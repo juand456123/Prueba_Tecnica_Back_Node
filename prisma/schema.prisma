@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+}
+
+model Producto {
+  id              Int      @id @default(autoincrement())
+  nombreProducto  String
+  ean             String   @unique
+  inventarios     Inventario[]
+  createdAt       DateTime @default(now())
+}
+
+model Bodega {
+  id            Int      @id @default(autoincrement())
+  nombreBodega  String
+  codigo        String   @unique
+  inventarios   Inventario[]
+  createdAt     DateTime @default(now())
+}
+
+model Inventario {
+  id         Int      @id @default(autoincrement())
+  productoId Int
+  bodegaId   Int
+  cantidad   Int      @default(0)
+
+  producto   Producto @relation(fields: [productoId], references: [id])
+  bodega     Bodega   @relation(fields: [bodegaId], references: [id])
+  movimientos Movimiento[]
+
+  @@unique([productoId, bodegaId]) 
+}
+
+model Movimiento {
+  id            Int      @id @default(autoincrement())
+  inventarioId  Int
+  cantidad      Int
+  tipo          TipoMovimiento   
+  fecha         DateTime @default(now())
+
+  inventario    Inventario @relation(fields: [inventarioId], references: [id])
+}
